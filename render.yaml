@@ -1,0 +1,32 @@
+services:
+  - type: web
+    name: velora-agent
+    env: python
+    region: oregon
+    plan: starter
+    buildCommand: pip install -r requirements.txt
+    startCommand: uvicorn velora.api.server:app --host 0.0.0.0 --port $PORT --workers 1 --log-level warning
+    healthCheckPath: /health
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.12.0
+      - key: CROO_SDK_KEY
+        sync: false
+      - key: CROO_AGENT_ID
+        sync: false
+      - key: SECRET_KEY
+        generateValue: true
+      - key: OPENAI_API_KEY
+        sync: false
+      - key: GROQ_API_KEY
+        sync: false
+      - key: SERPER_API_KEY
+        sync: false
+      - key: ENVIRONMENT
+        value: production
+      - key: LOG_LEVEL
+        value: INFO
+      - key: NEGOTIATION_AUTO_ACCEPT
+        value: "true"
+      - key: MAX_CONCURRENT_ORDERS
+        value: "10"
