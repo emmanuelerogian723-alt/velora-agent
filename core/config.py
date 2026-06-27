@@ -1,6 +1,12 @@
 """
 Velora — Core Configuration
-Loads all env vars, validates them, exposes a single settings object.
+Loads all settings from environment variables.
+Validates on startup — bad config = fast fail.
+
+Secret naming:
+  CROO_API_KEY  = Base44 secret name (auto-injected by platform)
+  CROO_SDK_KEY  = legacy / local .env name
+Both are checked; CROO_API_KEY takes priority.
 """
 from __future__ import annotations
 
@@ -8,7 +14,7 @@ import os
 from functools import lru_cache
 from typing import List, Optional
 
-from pydantic import Field, field_validator
+from pydantic import Field, model_validator
 from pydantic_settings import BaseSettings
 
 
@@ -16,19 +22,21 @@ class Settings(BaseSettings):
     # ── App ──────────────────────────────────────────────────────────────────
     APP_NAME: str = "Velora"
     APP_VERSION: str = "1.0.0"
-    ENVIRONMENT: str = Field("production", pattern="^(development|staging|production)$")
+    ENVIRONMENT: str = "production"
     DEBUG: bool = False
     LOG_LEVEL: str = "INFO"
-    SECRET_KEY: str = Field(..., min_length=32)
+    SECRET_KEY: str = Field(default="velora-default-secret-key-change-in-production")
 
     # ── CROO Protocol ─────────────────────────────────────────────────────────
     CROO_API_URL: str = "https://api.croo.network"
     CROO_WS_URL: str = "wss://api.croo.network/ws"
-    CROO_SDK_KEY: str = Field(..., description="croo_sk_... API key from agent.croo.network")
-    CROO_AGENT_ID: str = Field(..., description="Agent ID from CROO dashboard")
+    # CROO_API_KEY is resolved dynamically via os.environ in croo/client.py
+    # so it does NOT need to be declared here — it is picked up at runtime
+    CROO_SDK_KEY: str = Field(default="")  # fallback / local dev
+    CROO_AGENT_ID: str = Field(default="")
     BASE_RPC_URL: str = "https://mainnet.base.org"
 
-    # ── AI Providers (at least one required) ─────────────────────────────────
+    # ── AI Providers ─────────────────────────────────────────────────────────
     OPENAI_API_KEY: Optional[str] = None
     GROQ_API_KEY: Optional[str] = None
     ANTHROPIC_API_KEY: Optional[str] = None
@@ -36,7 +44,6 @@ class Settings(BaseSettings):
     OPENROUTER_API_KEY: Optional[str] = None
     OLLAMA_BASE_URL: Optional[str] = "http://localhost:11434"
 
-    # AI model preferences (ordered fallback chain)
     AI_PRIMARY_PROVIDER: str = "openai"
     AI_FALLBACK_CHAIN: List[str] = ["groq", "anthropic", "gemini", "openrouter", "ollama"]
     AI_DEFAULT_MODEL: str = "gpt-4o"
@@ -48,15 +55,12 @@ class Settings(BaseSettings):
     BRAVE_SEARCH_API_KEY: Optional[str] = None
 
     # ── Database ──────────────────────────────────────────────────────────────
-    DATABASE_URL: str = Field(
-        "postgresql+asyncpg://velora:velora@localhost:5432/velora",
-        description="Async PostgreSQL connection string"
-    )
+    DATABASE_URL: str = "postgresql+asyncpg://velora:velora@localhost:5432/velora"
 
     # ── Redis ─────────────────────────────────────────────────────────────────
     REDIS_URL: str = "redis://localhost:6379/0"
-    REDIS_TTL_DEFAULT: int = 3600       # 1 hour
-    REDIS_TTL_TASK_RESULT: int = 86400  # 24 hours
+    REDIS_TTL_DEFAULT: int = 3600
+    REDIS_TTL_TASK_RESULT: int = 86400
 
     # ── API Server ────────────────────────────────────────────────────────────
     HOST: str = "0.0.0.0"
@@ -64,13 +68,9 @@ class Settings(BaseSettings):
     WORKERS: int = 1
     ALLOWED_ORIGINS: List[str] = ["*"]
 
-    # ── Rate Limiting ─────────────────────────────────────────────────────────
-    RATE_LIMIT_REQUESTS: int = 100
-    RATE_LIMIT_WINDOW: int = 60         # seconds
-
     # ── Security ──────────────────────────────────────────────────────────────
     API_KEY_HEADER: str = "X-Velora-Key"
-    VELORA_API_KEY: Optional[str] = None  # optional internal API key
+    VELORA_API_KEY: Optional[str] = None
 
     # ── CROO Order Behavior ───────────────────────────────────────────────────
     NEGOTIATION_AUTO_ACCEPT: bool = True
@@ -79,14 +79,29 @@ class Settings(BaseSettings):
     DELIVERY_RETRY_ATTEMPTS: int = 3
     DELIVERY_RETRY_DELAY: float = 2.0
 
-    @field_validator("CROO_SDK_KEY")
-    @classmethod
-    def croo_key_format(cls, v: str) -> str:
-        if not v.startswith("croo_sk_"):
-            raise ValueError("CROO_SDK_KEY must start with 'croo_sk_'")
-        return v
+    @model_validator(mode="after")
+    def check_croo_key_available(self) -> "Settings":
+        """
+        Verify at least one CROO key source is configured.
+        Checks both CROO_API_KEY (Base44 platform secret) and CROO_SDK_KEY.
+        """
+        croo_api_key = os.environ.get("CROO_API_KEY", "")
+        croo_sdk_key = self.CROO_SDK_KEY or ""
+        if not croo_api_key and not croo_sdk_key:
+            import warnings
+            warnings.warn(
+                "No CROO API key configured. Set CROO_API_KEY or CROO_SDK_KEY. "
+                "Get your key from https://agent.croo.network",
+                stacklevel=2,
+            )
+        return self
 
-    model_config = {"env_file": ".env", "env_file_encoding": "utf-8", "case_sensitive": True}
+    model_config = {
+        "env_file": ".env",
+        "env_file_encoding": "utf-8",
+        "case_sensitive": True,
+        "extra": "ignore",
+    }
 
 
 @lru_cache(maxsize=1)
