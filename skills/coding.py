@@ -5,9 +5,9 @@ from __future__ import annotations
 
 from typing import Any, Dict
 
-from velora.core.ai_engine import AIMessage, ai_engine
-from velora.core.logger import get_logger
-from velora.skills.base import BaseSkill, SkillResult
+from core.ai_engine import AIMessage, ai_engine
+from core.logger import get_logger
+from skills.base import BaseSkill, SkillResult
 
 log = get_logger("velora.skills.coding")
 

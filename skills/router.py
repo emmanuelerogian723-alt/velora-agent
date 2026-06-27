@@ -8,9 +8,9 @@ from __future__ import annotations
 import re
 from typing import Any, Dict, List, Optional, Type
 
-from velora.core.ai_engine import AIMessage, ai_engine
-from velora.core.logger import get_logger
-from velora.skills.base import BaseSkill, SkillResult
+from core.ai_engine import AIMessage, ai_engine
+from core.logger import get_logger
+from skills.base import BaseSkill, SkillResult
 
 log = get_logger("velora.skills.router")
 
@@ -58,10 +58,10 @@ class SkillRouter:
         self._register_all()
 
     def _register_all(self) -> None:
-        from velora.skills.research import ResearchSkill
-        from velora.skills.coding import CodingSkill, TechnicalWritingSkill
-        from velora.skills.analysis import DataAnalysisSkill, BusinessPlanningSkill, StartupValidationSkill
-        from velora.skills.content import (
+        from skills.research import ResearchSkill
+        from skills.coding import CodingSkill, TechnicalWritingSkill
+        from skills.analysis import DataAnalysisSkill, BusinessPlanningSkill, StartupValidationSkill
+        from skills.content import (
             ContentCreationSkill, SummarizationSkill,
             ReasoningSkill, PlanningSkill, AutomationSkill,
         )

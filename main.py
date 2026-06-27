@@ -3,7 +3,7 @@ Velora — Entry Point
 Run with: python -m velora.main  OR  uvicorn velora.api.server:app
 """
 import uvicorn
-from velora.core.config import settings
+from core.config import settings
 
 if __name__ == "__main__":
     uvicorn.run(

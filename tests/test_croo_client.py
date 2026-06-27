@@ -4,7 +4,7 @@ Velora — Unit Tests for CROO Client
 import pytest
 from unittest.mock import AsyncMock, MagicMock, patch
 
-from velora.croo.client import CROOClient
+from croo.client import CROOClient
 
 
 @pytest.fixture

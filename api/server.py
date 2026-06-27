@@ -18,10 +18,10 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 from fastapi.security.api_key import APIKeyHeader
 
-from velora.core.config import settings
-from velora.core.logger import get_logger
-from velora.croo.provider import velora_provider
-from velora.skills.router import skill_router
+from core.config import settings
+from core.logger import get_logger
+from protocol.provider import velora_provider
+from skills.router import skill_router
 
 log = get_logger("velora.api.server")
 _startup_time = time.time()
@@ -42,7 +42,7 @@ async def lifespan(app: FastAPI):
     )
 
     # Test CROO connection on startup
-    from velora.croo.client import croo_client
+    from protocol.client import croo_client
     conn = await croo_client.test_connection()
     if conn["connected"]:
         log.info("CROO connection verified", extra=conn)
@@ -203,7 +203,7 @@ async def test_croo_connection() -> Dict[str, Any]:
     Verify the CROO SDK key is valid and the API is reachable.
     Returns connection status and agent details.
     """
-    from velora.croo.client import croo_client
+    from protocol.client import croo_client
     result = await croo_client.test_connection()
     if not result["connected"]:
         raise HTTPException(status_code=503, detail=result)
@@ -213,7 +213,7 @@ async def test_croo_connection() -> Dict[str, Any]:
 @app.get("/croo/negotiations", tags=["CROO"], summary="List pending negotiations")
 async def list_negotiations() -> Dict[str, Any]:
     """List all pending negotiations waiting for Velora to accept."""
-    from velora.croo.client import croo_client
+    from protocol.client import croo_client
     negs = await croo_client.list_pending_negotiations()
     return {
         "count": len(negs),
@@ -231,7 +231,7 @@ async def list_negotiations() -> Dict[str, Any]:
 @app.get("/croo/orders", tags=["CROO"], summary="List active (paid) orders")
 async def list_orders() -> Dict[str, Any]:
     """List all paid orders currently in execution."""
-    from velora.croo.client import croo_client
+    from protocol.client import croo_client
     orders = await croo_client.list_active_orders()
     return {
         "active_in_memory": velora_provider.active_order_count,

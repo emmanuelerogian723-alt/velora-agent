@@ -40,7 +40,7 @@ class JSONFormatter(logging.Formatter):
 
 
 def get_logger(name: str, level: Optional[str] = None) -> logging.Logger:
-    from velora.core.config import settings
+    from core.config import settings
 
     log = logging.getLogger(name)
     if not log.handlers:

@@ -8,10 +8,10 @@ from typing import Any, Dict, List
 
 import httpx
 
-from velora.core.ai_engine import AIMessage, ai_engine
-from velora.core.config import settings
-from velora.core.logger import get_logger
-from velora.skills.base import BaseSkill, SkillResult
+from core.ai_engine import AIMessage, ai_engine
+from core.config import settings
+from core.logger import get_logger
+from skills.base import BaseSkill, SkillResult
 
 log = get_logger("velora.skills.research")
 

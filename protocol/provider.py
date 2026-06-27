@@ -12,10 +12,10 @@ from typing import Dict, Optional
 
 from croo import EventType, Event
 
-from velora.core.config import settings
-from velora.core.logger import get_logger
-from velora.croo.client import croo_client
-from velora.skills.router import skill_router
+from core.config import settings
+from core.logger import get_logger
+from protocol.client import croo_client
+from skills.router import skill_router
 
 log = get_logger("velora.croo.provider")
 

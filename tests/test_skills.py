@@ -5,12 +5,12 @@ import asyncio
 import pytest
 from unittest.mock import AsyncMock, MagicMock, patch
 
-from velora.skills.base import SkillResult
-from velora.skills.router import SkillRouter, GeneralSkill
-from velora.skills.research import ResearchSkill
-from velora.skills.coding import CodingSkill
-from velora.skills.analysis import DataAnalysisSkill, BusinessPlanningSkill
-from velora.skills.content import SummarizationSkill, PlanningSkill
+from skills.base import SkillResult
+from skills.router import SkillRouter, GeneralSkill
+from skills.research import ResearchSkill
+from skills.coding import CodingSkill
+from skills.analysis import DataAnalysisSkill, BusinessPlanningSkill
+from skills.content import SummarizationSkill, PlanningSkill
 
 
 MOCK_AI_RESPONSE = MagicMock()

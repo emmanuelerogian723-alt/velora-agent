@@ -12,8 +12,8 @@ from typing import Any, Dict, List, Optional
 
 import httpx
 
-from velora.core.config import settings
-from velora.core.logger import get_logger
+from core.config import settings
+from core.logger import get_logger
 
 log = get_logger("velora.ai_engine")
 
