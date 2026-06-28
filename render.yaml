@@ -4,8 +4,8 @@ services:
     env: python
     region: oregon
     plan: starter
-    buildCommand: pip install fastapi uvicorn[standard] pydantic pydantic-settings httpx croo-sdk
-    startCommand: uvicorn velora.api.server:app --host 0.0.0.0 --port $PORT --workers 1 --log-level info
+    buildCommand: pip install fastapi "uvicorn[standard]" pydantic pydantic-settings httpx croo-sdk
+    startCommand: uvicorn app:app --host 0.0.0.0 --port $PORT --workers 1 --log-level info
     healthCheckPath: /health
     envVars:
       - key: PYTHON_VERSION
